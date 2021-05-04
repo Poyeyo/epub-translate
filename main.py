@@ -80,7 +80,7 @@ with ZipFile(filename, 'r') as zip:
 							if args.verbose:
 								print("translatable:", original_text)
 							translation = translate_client.translate(str(original_text), source_language=sourcelang, target_language=targetlang)
-							translated_text = translation['TranslatedText']
+							translated_text = translation['translatedText']
 							if args.verbose:
 								print("translation:", translated_text)
 							if args.columns:
