@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf_8 -*- 
 
+import sys
+if sys.version_info[0] < 3:
+	raise Exception("Must be using Python 3")
+
 import argparse
 from zipfile import ZipFile
 from html import escape
