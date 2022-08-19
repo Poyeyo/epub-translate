@@ -5,13 +5,14 @@ After translation, use Calibre editor to fix any errors before opening the resul
 
 Requirements:
 
-You need Google Translate API credentials in json format. See the Google API documentation for more information.
+Depending on the engine used, you will need Google, AWS, or DeepL credentials.
+See the corresponding translation provider documentation for more information.
 
 Usage:
 
 
     python main.py -h
-    usage: main.py [-h] [-v] [-c] [-s SOURCELANG] [-t TARGETLANG] [-f FILE] [-o FILE]
+    usage: main.py [-h] [-v] [-c] [-s SOURCELANG] [-t TARGETLANG] [-f FILE] [-o FILE] [-e ENGINE]
     
     optional arguments:
       -h, --help            show this help message and exit
@@ -24,5 +25,6 @@ Usage:
       -f FILE, --file FILE  read epub from FILE
       -o FILE, --outfile FILE
                             write translated epub to FILE
-                        
+      -e ENGINE, --engine ENGINE
+                            valid options are: google, aws, deepl. Default is google.
                         

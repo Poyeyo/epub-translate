@@ -9,11 +9,6 @@ import argparse
 from zipfile import ZipFile
 from html import escape
 
-import six
-from google.cloud import translate_v2 as translate
-
-translate_client = translate.Client()
-
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true")
 parser.add_argument("-c", "--columns", help="save text as parallel texts, with both languages side by side", action="store_true")
@@ -22,6 +17,7 @@ parser.add_argument("-t", "--targetlang", dest="targetlang", help="language to t
 parser.add_argument("-f", "--file", dest="filename", help="read epub from FILE", metavar="FILE")
 parser.add_argument("-o", "--outfile", dest="out_filename", help="write translated epub to FILE", metavar="FILE")
 parser.add_argument("-d", "--donotranslate", dest="donotranslate", help="test run, do not translate", action="store_true")
+parser.add_argument("-e", "--engine", default="google", choices=['google', 'aws', 'deepl'], dest="engine", help="Translation engine. Default is Google Translate")
 
 args = parser.parse_args()
 
@@ -39,6 +35,7 @@ if args.filename:
 if args.out_filename:
 	out_filename = args.out_filename
 
+engine = args.engine
 
 def is_printable(s):
 	return not any(repr(ch).startswith("'\\x") or repr(ch).startswith("'\\u") for ch in s)
@@ -57,6 +54,22 @@ def translatable (string):
 	if (string == '\n'):
 		return False
 	return True
+
+
+match engine:
+	case "google":
+		import six
+		from google.cloud import translate_v2 as translate
+		translate_client = translate.Client()
+
+	case "aws":
+		import boto3
+		translate = boto3.client('translate')
+
+	case "deepl":
+		import deepl
+		auth_key = "f63c02c5-f056-..."  # Replace with your key
+		translator = deepl.Translator(auth_key)
 
 
 with ZipFile(filename, 'r') as zip:
@@ -91,8 +104,19 @@ with ZipFile(filename, 'r') as zip:
 							if args.donotranslate or tag in ["title", "style"]:
 								translated_text = original_text
 							else:
-								translation = translate_client.translate(str(original_text), source_language=sourcelang, target_language=targetlang)
-								translated_text = translation['translatedText']
+								match engine:
+									case "google":
+										translation = translate_client.translate(str(original_text), source_language=sourcelang, target_language=targetlang)
+										translated_text = translation['translatedText']
+
+									case "aws":
+										translation = translate.translate_text(Text=str(original_text), SourceLanguageCode=sourcelang, TargetLanguageCode=targetlang)
+										translated_text = translation['TranslatedText']
+
+									case "deepl":
+										translation = translator.translate_text(str(original_text), source_lang=sourcelang, target_lang=targetlang, split_sentences='nonewlines')
+										translated_text = translation.text
+
 							if args.verbose:
 								print("translation:", translated_text)
 							if args.columns:
