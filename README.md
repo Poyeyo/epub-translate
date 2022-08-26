@@ -1,5 +1,5 @@
 # epub-translate
-Script to automatically translate an ePub using Google API. It can output parallel text in columns.
+Script to automatically translate an ePub using Google, AWS, or DeepL API. It can output parallel text in columns.
 
 After translation, use Calibre editor to fix any errors before opening the resulting ePub file.
 
